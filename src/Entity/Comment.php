@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use DateTimeImmutable;
@@ -11,53 +13,53 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity(repositoryClass="App\Repository\CommentRepository")
  * @ORM\HasLifecycleCallbacks()
  */
-class Comment
+final class Comment
 {
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private ?int $id = null;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank
      */
-    private $author;
+    private ?string $author = null;
 
     /**
      * @ORM\Column(type="text")
      * @Assert\NotBlank
      */
-    private $text;
+    private ?string $text = null;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank
      * @Assert\Email
      */
-    private $email;
+    private ?string $email = null;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $createdAt;
+    private ?DateTimeInterface $createdAt = null;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Conference", inversedBy="comments")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $conference;
+    private ?Conference $conference = null;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $photoFilename;
+    private ?string $photoFilename = null;
 
-    public function __toString(): string
+    public function __toString(): ?string
     {
-        return (string) $this->getEmail();
+        return $this->email ?? '';
     }
 
     public function getId(): ?int

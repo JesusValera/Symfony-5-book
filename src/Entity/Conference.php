@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
@@ -12,31 +14,32 @@ use Symfony\Component\String\Slugger\SluggerInterface;
  * @ORM\Entity(repositoryClass="App\Repository\ConferenceRepository")
  * @UniqueEntity("slug")
  */
-class Conference
+final class Conference
 {
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private ?int $id = null;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $city;
+    private ?string $city = null;
 
     /**
      * @ORM\Column(type="string", length=4)
      */
-    private $year;
+    private ?string $year = null;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $isInternational;
+    private bool $isInternational = false;
 
     /**
+     * @var array|Comment[]
      * @ORM\OneToMany(targetEntity="App\Entity\Comment", mappedBy="conference", orphanRemoval=true)
      */
     private $comments;
@@ -44,7 +47,7 @@ class Conference
     /**
      * @ORM\Column(type="string", length=255, unique=true)
      */
-    private $slug;
+    private ?string $slug = null;
 
     public function __construct()
     {

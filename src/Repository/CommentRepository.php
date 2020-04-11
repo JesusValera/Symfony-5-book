@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repository;
 
 use App\Entity\Comment;
@@ -14,7 +16,7 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Comment[]    findAll()
  * @method Comment[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class CommentRepository extends ServiceEntityRepository
+final class CommentRepository extends ServiceEntityRepository
 {
     public const PAGINATOR_PER_PAGE = 2;
 
@@ -40,7 +42,7 @@ class CommentRepository extends ServiceEntityRepository
     //  * @return Comment[] Returns an array of Comment objects
     //  */
     /*
-    public function findByExampleField($value)
+    public function findByExampleField($value): array
     {
         return $this->createQueryBuilder('c')
             ->andWhere('c.exampleField = :val')

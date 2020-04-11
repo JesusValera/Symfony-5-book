@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repository;
 
 use App\Entity\Conference;
@@ -11,7 +13,7 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Conference|null findOneBy(array $criteria, array $orderBy = null)
  * @method Conference[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class ConferenceRepository extends ServiceEntityRepository
+final class ConferenceRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -30,7 +32,7 @@ class ConferenceRepository extends ServiceEntityRepository
     //  * @return Conference[] Returns an array of Conference objects
     //  */
     /*
-    public function findByExampleField($value)
+    public function findByExampleField($value): array
     {
         return $this->createQueryBuilder('c')
             ->andWhere('c.exampleField = :val')
