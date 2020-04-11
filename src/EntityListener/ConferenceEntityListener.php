@@ -17,10 +17,8 @@ final class ConferenceEntityListener
         $this->slugger = $slugger;
     }
 
-    public function prePersist(
-        Conference $conference,
-        LifecycleEventArgs $event
-    ): void {
+    public function prePersist(Conference $conference, LifecycleEventArgs $event): void
+    {
         $conference->computeSlug($this->slugger);
     }
 
