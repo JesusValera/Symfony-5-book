@@ -6,6 +6,7 @@
 /config/secrets/prod/prod.decrypt.private.php
 /public/bundles/
 /public/uploads/photos/
+/config/secrets/dev/
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
