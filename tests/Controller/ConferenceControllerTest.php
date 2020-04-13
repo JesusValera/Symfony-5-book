@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tests\Controller;
 
+use App\Entity\Comment;
+use App\Repository\CommentRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class ConferenceControllerTest extends WebTestCase
@@ -25,11 +28,18 @@ final class ConferenceControllerTest extends WebTestCase
         $client->request('GET', '/conference/amsterdam-2019');
         $client->submitForm('Submit', [
             'comment_form[author]' => 'Fabien',
-            'comment_form[text]' => 'Some fedback from an automated functional test',
-            'comment_form[email]' => 'me@automad.ed',
+            'comment_form[text]' => 'Some feedback from an automated functional test',
+            'comment_form[email]' => $email = 'me@automad.ed',
             'comment_form[photo]' => dirname(__DIR__, 2) . '/public/images/under-construction.gif',
         ]);
         self::assertResponseRedirects();
+
+        // Simulate comment validation.
+        /** @var Comment $comment */
+        $comment = self::$container->get(CommentRepository::class)->findOneByEmail($email);
+        $comment->setState('published');
+        self::$container->get(EntityManagerInterface::class)->flush();
+
         $client->followRedirect();
         self::assertSelectorExists('div:contains("There are 2 comments")');
     }
