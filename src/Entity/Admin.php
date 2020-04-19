@@ -10,7 +10,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 /**
  * @ORM\Entity(repositoryClass="App\Repository\AdminRepository")
  */
-final class Admin implements UserInterface
+class Admin implements UserInterface
 {
     /**
      * @ORM\Id()
