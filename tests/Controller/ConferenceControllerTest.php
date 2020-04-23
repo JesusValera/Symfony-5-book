@@ -41,7 +41,7 @@ final class ConferenceControllerTest extends WebTestCase
         self::$container->get(EntityManagerInterface::class)->flush();
 
         $client->followRedirect();
-        self::assertSelectorExists('div:contains("There are 3 comments")');
+        self::assertSelectorExists('div:contains("There are 2 comments")');
     }
 
     /** @test */
@@ -57,6 +57,6 @@ final class ConferenceControllerTest extends WebTestCase
         self::assertPageTitleContains('Amsterdam');
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h2', 'Amsterdam 2019');
-        self::assertSelectorExists('div:contains("There are 2 comments")');
+        self::assertSelectorExists('div:contains("There are 1 comments")');
     }
 }
