@@ -26,9 +26,15 @@ final class StepInfoCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $process = new Process(['echo', 'hello']);
-        $process->mustRun();
-        $output->write($process->getOutput());
+        $result = $this->cache->get('app.display_msg', static function(CacheItem $item) {
+            $process = new Process(['echo', 'hello']);
+            $process->mustRun();
+            $item->expiresAfter(30);
+
+            return $process->getOutput();
+        });
+
+        $output->write($result);
 
         return 0;
     }
