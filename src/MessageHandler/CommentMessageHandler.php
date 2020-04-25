@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\MessageHandler;
 
+use App\ImageOptimizer;
 use App\Message\CommentMessage;
 use App\Repository\CommentRepository;
 use App\SpamChecker;
@@ -23,7 +24,9 @@ final class CommentMessageHandler implements MessageHandlerInterface
     private MessageBusInterface $messageBus;
     private WorkflowInterface $workflow;
     private MailerInterface $mailer;
+    private ImageOptimizer $imageOptimizer;
     private string $adminEmail;
+    private string $photoDir;
     private LoggerInterface $logger;
 
     public function __construct(
@@ -33,7 +36,9 @@ final class CommentMessageHandler implements MessageHandlerInterface
         MessageBusInterface $messageBus,
         WorkflowInterface $commentStateMachine,
         MailerInterface $mailer,
+        ImageOptimizer $imageOptimizer,
         string $adminEmail,
+        string $photoDir,
         LoggerInterface $logger
     ) {
         $this->entityManager = $entityManager;
@@ -42,7 +47,9 @@ final class CommentMessageHandler implements MessageHandlerInterface
         $this->messageBus = $messageBus;
         $this->workflow = $commentStateMachine;
         $this->mailer = $mailer;
+        $this->imageOptimizer = $imageOptimizer;
         $this->adminEmail = $adminEmail;
+        $this->photoDir = $photoDir;
         $this->logger = $logger;
     }
 
@@ -74,6 +81,12 @@ final class CommentMessageHandler implements MessageHandlerInterface
                     ->to($this->adminEmail)
                     ->context(['comment' => $comment])
             );
+        } elseif ($this->workflow->can($comment, 'optimize')) {
+            if ($comment->getPhotoFilename()) {
+                $this->imageOptimizer->resize($this->photoDir . '/' . $comment->getPhotoFilename());
+            }
+            $this->workflow->apply($comment, 'optimize');
+            $this->entityManager->flush();
         } elseif ($this->logger) {
             $this->logger->debug('Dropping comment message', [
                 'comment' => $comment->getId(),
