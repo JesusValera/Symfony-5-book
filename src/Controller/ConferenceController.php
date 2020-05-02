@@ -110,12 +110,12 @@ final class ConferenceController extends AbstractController
             return $this->redirectToRoute('conference', ['slug' => $conference->getSlug()]);
         }
 
-        $offset = max(0, $request->query->getInt('offset', 0));
-        $paginator = $commentRepository->getCommentPaginator($conference, $offset);
-
         if ($form->isSubmitted()) {
             $notifier->send(new Notification('Can you check your submission? There are some problems with it.', ['browser']));
         }
+
+        $offset = max(0, $request->query->getInt('offset', 0));
+        $paginator = $commentRepository->getCommentPaginator($conference, $offset);
 
         return new Response($this->twig->render('conference/show.html.twig', [
             'conference' => $conference,

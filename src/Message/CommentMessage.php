@@ -22,7 +22,7 @@ final class CommentMessage
         return $this->id;
     }
 
-    public function reviewUrl(): string
+    public function getReviewUrl(): string
     {
         return $this->reviewUrl;
     }

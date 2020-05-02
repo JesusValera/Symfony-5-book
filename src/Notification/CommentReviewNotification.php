@@ -69,7 +69,7 @@ final class CommentReviewNotification extends Notification implements
                 )
                 ->block(
                     (new SlackActionsBlock())
-                        ->button('Accept', $this->reviewUrl . 'primary')
+                        ->button('Accept', $this->reviewUrl, 'primary')
                         ->button('Reject', $this->reviewUrl . '?reject=1', 'danger')
                 )
         );
