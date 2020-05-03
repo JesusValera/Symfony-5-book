@@ -25,7 +25,7 @@ final class AdminController extends AbstractController
 {
     private Environment $twig;
     private EntityManagerInterface $entityManager;
-    private MessageBusInterface $bus;
+    private MessageBusInterface $messageBus;
 
     public function __construct(
         Environment $twig,
@@ -34,7 +34,7 @@ final class AdminController extends AbstractController
     ) {
         $this->twig = $twig;
         $this->entityManager = $entityManager;
-        $this->bus = $bus;
+        $this->messageBus = $bus;
     }
 
     /**
@@ -57,12 +57,14 @@ final class AdminController extends AbstractController
         $this->entityManager->flush();
 
         if ($accepted) {
-            $reviewUrl = $this->generateUrl(
-                'review_comment',
-                ['id' => $comment->getId()],
-                UrlGeneratorInterface::ABSOLUTE_URL
-            );
-            $this->bus->dispatch(new CommentMessage($comment->getId(), $reviewUrl, []));
+            if ($conference = $comment->getConference()) {
+                $url = $this->generateUrl(
+                    'conference',
+                    ['slug' => $conference->getSlug()],
+                    UrlGeneratorInterface::ABSOLUTE_URL,
+                );
+            }
+            $this->messageBus->dispatch(new CommentMessage($comment->getId(), ($url ?? $this->generateUrl('homepage')), []));
         }
 
         return $this->render('admin/review.html.twig', [

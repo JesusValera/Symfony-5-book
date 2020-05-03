@@ -23,10 +23,10 @@ final class CommentReviewNotification extends Notification implements
     private Comment $comment;
     private string $reviewUrl;
 
-    public function __construct(Comment $comment, string $reviewUrl)
+    public function __construct(Comment $comment, string $url)
     {
         $this->comment = $comment;
-        $this->reviewUrl = $reviewUrl;
+        $this->reviewUrl = $url;
 
         parent::__construct('New comment posted');
     }

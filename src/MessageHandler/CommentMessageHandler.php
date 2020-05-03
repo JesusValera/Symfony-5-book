@@ -6,6 +6,7 @@ namespace App\MessageHandler;
 
 use App\ImageOptimizer;
 use App\Message\CommentMessage;
+use App\Notification\CommentApprovedNotification;
 use App\Notification\CommentReviewNotification;
 use App\Repository\CommentRepository;
 use App\SpamChecker;
@@ -70,7 +71,7 @@ final class CommentMessageHandler implements MessageHandlerInterface
             $this->entityManager->flush();
             $this->messageBus->dispatch($message);
         } elseif ($this->workflow->can($comment, 'publish') || $this->workflow->can($comment, 'publish_ham')) {
-            $notification = new CommentReviewNotification($comment, $message->getReviewUrl());
+            $notification = new CommentReviewNotification($comment, $message->getUrl());
             $this->notifier->send($notification, ...$this->notifier->getAdminRecipients());
         } elseif ($this->workflow->can($comment, 'optimize')) {
             if ($comment->getPhotoFilename()) {
@@ -78,6 +79,9 @@ final class CommentMessageHandler implements MessageHandlerInterface
             }
             $this->workflow->apply($comment, 'optimize');
             $this->entityManager->flush();
+
+            $notification = new CommentApprovedNotification($comment, $message->getUrl());
+            $this->notifier->send($notification, ...$this->notifier->getAdminRecipients());
         } elseif ($this->logger) {
             $this->logger->debug('Dropping comment message', [
                 'comment' => $comment->getId(),
