@@ -12,6 +12,7 @@ use App\Repository\CommentRepository;
 use App\Repository\ConferenceRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
@@ -87,32 +88,9 @@ final class ConferenceController extends AbstractController
         $form = $this->createForm(CommentFormType::class, $comment);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $comment->setConference($conference);
-            /** @var File\UploadedFile $photo */
-            if ($photo = $form['photo']->getData()) {
-                $filename = bin2hex(random_bytes(6)) . '.' . $photo->guessExtension();
-                try {
-                    $photo->move($photoDir, $filename);
-                } catch (FileException $exception) {
-                    // Unable to upload the photo, give up.
-                }
-                $comment->setPhotoFilename($filename);
-            }
-            $this->entityManager->persist($comment);
-            $this->entityManager->flush();
+            $this->updateAndPersistComment($comment, $conference, $form, $photoDir);
 
-            $context = [
-                'user_ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('user-agent'),
-                'referrer' => $request->headers->get('referer'),
-                'permalink' => $request->getUri(),
-            ];
-            $reviewUrl = $this->generateUrl(
-                'review_comment',
-                ['id' => $comment->getId()],
-                UrlGeneratorInterface::ABSOLUTE_URL
-            );
-            $this->messageBus->dispatch(new CommentMessage($comment->getId(), $reviewUrl, $context));
+            $this->dispatchMessageBus($request, $comment);
             $notifier->send(new Notification('Thank you for the feedback; your comment will be posted after moderation.', ['browser']));
 
             return $this->redirectToRoute('conference', ['slug' => $conference->getSlug()]);
@@ -132,5 +110,47 @@ final class ConferenceController extends AbstractController
             'next' => min(count($paginator), $offset + CommentRepository::PAGINATOR_PER_PAGE),
             'comment_form' => $form->createView(),
         ]));
+    }
+
+    private function updateAndPersistComment(
+        Comment $comment,
+        Conference $conference,
+        FormInterface $form,
+        string $photoDir
+    ): void {
+        $comment->setConference($conference);
+        $this->uploadPhoto($form, $photoDir, $comment);
+        $this->entityManager->persist($comment);
+        $this->entityManager->flush();
+    }
+
+    private function uploadPhoto(FormInterface $form, string $photoDir, Comment $comment): void
+    {
+        /** @var File\UploadedFile $photo */
+        if ($photo = $form->getData()) {
+            $filename = bin2hex(random_bytes(6)) . '.' . $photo->guessExtension();
+            try {
+                $photo->move($photoDir, $filename);
+            } catch (FileException $exception) {
+                // Unable to upload the photo, give up.
+            }
+            $comment->setPhotoFilename($filename);
+        }
+    }
+
+    private function dispatchMessageBus(Request $request, Comment $comment): void
+    {
+        $context = [
+            'user_ip' => $request->getClientIp(),
+            'user_agent' => $request->headers->get('user-agent'),
+            'referrer' => $request->headers->get('referer'),
+            'permalink' => $request->getUri(),
+        ];
+        $reviewUrl = $this->generateUrl(
+            'review_comment',
+            ['id' => $comment->getId()],
+            UrlGeneratorInterface::ABSOLUTE_URL
+        );
+        $this->messageBus->dispatch(new CommentMessage($comment->getId(), $reviewUrl, $context));
     }
 }
