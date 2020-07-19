@@ -127,7 +127,7 @@ final class ConferenceController extends AbstractController
     private function uploadPhoto(FormInterface $form, string $photoDir, Comment $comment): void
     {
         /** @var File\UploadedFile $photo */
-        if ($photo = $form->getData()) {
+        if ($photo = $form['photo']->getData()) {
             $filename = bin2hex(random_bytes(6)) . '.' . $photo->guessExtension();
             try {
                 $photo->move($photoDir, $filename);
